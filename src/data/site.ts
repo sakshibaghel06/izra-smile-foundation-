@@ -66,9 +66,9 @@ export const supportAreas: SupportArea[] = [
     image: "/images/WhatsApp Image 2026-10-01 at 9.37.06 AM.jpeg",
   },
   {
-    title: "Elderly Care",
+    title: "Women Empowerment",
     description:
-      "Recognizing the dignity and needs of older adults through compassionate and respectful support.",
+      "Supporting women by promoting dignity, confidence, opportunities, and greater participation in community life.",
     icon: HeartHandshake,
     image: "/images/WhatsApp Image 2026-10-01 at 9.37.09 AM.jpeg",
   },
@@ -94,9 +94,9 @@ export const supportAreas: SupportArea[] = [
     image: "/images/WhatsApp Image 2026-10-01 at 9.37.04 AM.jpeg",
   },
   {
-    title: "Essential Needs",
+    title: "Slum Education",
     description:
-      "Helping communities access food, hygiene essentials, and other daily necessities with dignity.",
+      "Supporting children in underserved communities by creating access to education, learning opportunities, and a better foundation for their future.",
     icon: Carrot,
     image: "/images/WhatsApp Image 2026-10-01 at 9.37.12 AM.jpeg",
   },
