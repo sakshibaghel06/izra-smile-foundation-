@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Camera, Mail, MapPin, Phone, Send } from "lucide-react";
 import { contactDetails } from "@/data/site";
+import { supabase } from "@/lib/supabase";
 import { Reveal } from "@/components/Reveal";
 
 type FormValues = {
@@ -40,6 +41,7 @@ export function ContactSection() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionError, setSubmissionError] = useState("");
   const fullNameInputRef = useRef<HTMLInputElement>(null);
 
   const validate = () => {
@@ -86,22 +88,43 @@ export function ContactSection() {
     if (isSubmitting || !validate()) return;
 
     setIsSubmitting(true);
-    await new Promise<void>((resolve) => window.setTimeout(resolve, 700));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormValues(emptyFormValues);
-    setErrors({});
+    setSubmissionError("");
+
+    try {
+      const { error } = await supabase.from("contact_submissions").insert({
+        full_name: formValues.fullName.trim(),
+        email: formValues.emailAddress.trim(),
+        phone: formValues.phoneNumber.trim() || null,
+        subject: formValues.subject,
+        message: formValues.message.trim(),
+      });
+
+      if (error) {
+        setSubmissionError("We couldn’t send your message right now. Please try again.");
+        return;
+      }
+
+      setIsSubmitted(true);
+      setFormValues(emptyFormValues);
+      setErrors({});
+    } catch {
+      setSubmissionError("We couldn’t send your message right now. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const onChange = (field: FormField, value: string) => {
     setFormValues((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: "" }));
+    setSubmissionError("");
   };
 
   const resetForm = () => {
     setIsSubmitted(false);
     setFormValues(emptyFormValues);
     setErrors({});
+    setSubmissionError("");
     window.requestAnimationFrame(() => fullNameInputRef.current?.focus());
   };
 
@@ -198,7 +221,7 @@ export function ContactSection() {
                   Send another message
                 </button>
                 <p className="text-xs leading-5 text-slate-500">
-                  This frontend simulation does not send or store messages.
+                  Your message has been submitted to Izra Smile Foundation.
                 </p>
               </div>
             </div>
@@ -322,9 +345,10 @@ export function ContactSection() {
                   {!isSubmitting ? <Send className="h-4 w-4" aria-hidden="true" /> : null}
                 </button>
                 <p className="text-xs leading-5 text-slate-500">
-                  This frontend simulation does not send or store messages.
+                  Your message will be submitted to Izra Smile Foundation.
                 </p>
               </div>
+              {submissionError ? <p role="alert" className="mt-4 text-sm text-rose-600">{submissionError}</p> : null}
             </form>
           )}
         </Reveal>

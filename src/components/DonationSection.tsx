@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { ArrowRight, Check, HandHeart } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import { Reveal } from "@/components/Reveal";
 
 type DonorDetails = {
@@ -53,6 +54,7 @@ export function DonationSection() {
   const [donorDetails, setDonorDetails] = useState<DonorDetails>(emptyDonorDetails);
   const [errors, setErrors] = useState<DonorErrors>({});
   const [isConfirming, setIsConfirming] = useState(false);
+  const [submissionError, setSubmissionError] = useState("");
 
   const selectedAmount = selectedPreset ?? (isCustomAmount && customAmount ? Number(customAmount) : null);
   const amountIsCustom = isCustomAmount;
@@ -142,13 +144,34 @@ export function DonationSection() {
     if (isConfirming || selectedAmount === null || selectedAmount <= 0) return;
 
     setIsConfirming(true);
-    await new Promise<void>((resolve) => window.setTimeout(resolve, 500));
-    setIsConfirming(false);
-    setStep(4);
-    setSelectedPreset(null);
-    setCustomAmount("");
-    setDonorDetails(emptyDonorDetails);
-    setErrors({});
+    setSubmissionError("");
+
+    try {
+      const { error } = await supabase.from("donation_intents").insert({
+        full_name: donorDetails.fullName.trim(),
+        email: donorDetails.email.trim(),
+        phone: donorDetails.phone.trim() || null,
+        amount: selectedAmount,
+        purpose: donorDetails.purpose,
+        message: donorDetails.message.trim() || null,
+      });
+
+      if (error) {
+        setSubmissionError("We couldn’t record your donation intent right now. Please try again.");
+        return;
+      }
+
+      setStep(4);
+      setSelectedPreset(null);
+      setIsCustomAmount(false);
+      setCustomAmount("");
+      setDonorDetails(emptyDonorDetails);
+      setErrors({});
+    } catch {
+      setSubmissionError("We couldn’t record your donation intent right now. Please try again.");
+    } finally {
+      setIsConfirming(false);
+    }
   };
 
   const resetDonation = () => {
@@ -159,6 +182,7 @@ export function DonationSection() {
     setAmountError("");
     setDonorDetails(emptyDonorDetails);
     setErrors({});
+    setSubmissionError("");
   };
 
   return (
@@ -464,14 +488,20 @@ export function DonationSection() {
                   <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                     <button
                       type="button"
-                      onClick={() => setStep(2)}
+                      onClick={() => {
+                        setSubmissionError("");
+                        setStep(2);
+                      }}
                       className="inline-flex flex-1 items-center justify-center rounded-full border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                     >
                       Edit Details
                     </button>
                     <button
                       type="button"
-                      onClick={() => setStep(1)}
+                      onClick={() => {
+                        setSubmissionError("");
+                        setStep(1);
+                      }}
                       className="inline-flex flex-1 items-center justify-center rounded-full border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                     >
                       Edit Amount
@@ -486,6 +516,7 @@ export function DonationSection() {
                       {!isConfirming ? <ArrowRight className="h-4 w-4" aria-hidden="true" /> : null}
                     </button>
                   </div>
+                  {submissionError ? <p role="alert" className="mt-4 text-sm text-rose-200">{submissionError}</p> : null}
                 </div>
               ) : null}
 
@@ -496,7 +527,7 @@ export function DonationSection() {
                     Your donation intent has been recorded for this demo experience. Online payment is not connected yet. Please contact Izra Smile Foundation using the verified contact details on this website for the current donation process.
                   </p>
                   <p className="mt-3 text-xs leading-5 text-slate-300">
-                    This demo does not send or store your donor information.
+                    No payment is taken. This form records your donation intent only.
                   </p>
                   <button
                     type="button"

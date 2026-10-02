@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { ArrowRight, Send } from "lucide-react";
 import { siteImages } from "@/data/images";
+import { supabase } from "@/lib/supabase";
 import { Reveal } from "@/components/Reveal";
 
 type FormValues = {
@@ -56,6 +57,7 @@ export function GetInvolvedSection() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionError, setSubmissionError] = useState("");
   const fullNameInputRef = useRef<HTMLInputElement>(null);
 
   const validate = () => {
@@ -102,16 +104,38 @@ export function GetInvolvedSection() {
     if (isSubmitting || !validate()) return;
 
     setIsSubmitting(true);
-    await new Promise<void>((resolve) => window.setTimeout(resolve, 700));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormValues(emptyFormValues);
-    setErrors({});
+    setSubmissionError("");
+
+    try {
+      const { error } = await supabase.from("volunteer_applications").insert({
+        full_name: formValues.fullName.trim(),
+        email: formValues.email.trim(),
+        phone: formValues.phone.trim() || null,
+        city: formValues.city.trim(),
+        help_type: formValues.helpType,
+        areas_of_interest: [...formValues.interests],
+        message: formValues.message.trim() || null,
+      });
+
+      if (error) {
+        setSubmissionError("We couldn’t submit your response right now. Please try again.");
+        return;
+      }
+
+      setIsSubmitted(true);
+      setFormValues(emptyFormValues);
+      setErrors({});
+    } catch {
+      setSubmissionError("We couldn’t submit your response right now. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const onChange = (field: Exclude<FormField, "interests">, value: string) => {
     setFormValues((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: "" }));
+    setSubmissionError("");
   };
 
   const toggleInterest = (interest: string) => {
@@ -122,12 +146,14 @@ export function GetInvolvedSection() {
         : [...current.interests, interest],
     }));
     setErrors((current) => ({ ...current, interests: "" }));
+    setSubmissionError("");
   };
 
   const resetForm = () => {
     setIsSubmitted(false);
     setFormValues(emptyFormValues);
     setErrors({});
+    setSubmissionError("");
     window.requestAnimationFrame(() => fullNameInputRef.current?.focus());
   };
 
@@ -184,7 +210,7 @@ export function GetInvolvedSection() {
                     Send another response
                   </button>
                   <p className="mt-4 text-xs leading-5 text-slate-300">
-                    This is a local demonstration. Your response has not been sent or stored.
+                    Your application has been submitted to Izra Smile Foundation.
                   </p>
                 </div>
               </div>
@@ -362,9 +388,10 @@ export function GetInvolvedSection() {
                     {!isSubmitting ? <Send className="h-4 w-4" aria-hidden="true" /> : null}
                   </button>
                   <p className="text-xs leading-5 text-slate-300">
-                    This is a local demonstration. Your response has not been sent or stored.
+                    Your application will be submitted to Izra Smile Foundation.
                   </p>
                 </div>
+                {submissionError ? <p role="alert" className="mt-4 text-sm text-rose-200">{submissionError}</p> : null}
               </form>
             )}
           </div>
