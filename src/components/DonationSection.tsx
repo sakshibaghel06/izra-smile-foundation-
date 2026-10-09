@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { ArrowRight, Check, HandHeart } from "lucide-react";
@@ -208,6 +209,26 @@ export function DonationSection() {
             </div>
 
             <div className="min-w-0 rounded-[1.5rem] border border-white/10 bg-white/5 p-5 backdrop-blur-sm sm:p-7">
+              <div className="mb-6 rounded-2xl bg-white p-5 text-center text-slate-900">
+                <p className="text-lg font-semibold">Support Our Mission</p>
+                <p className="mt-2 text-sm text-slate-600">
+                  Scan the QR code below using your UPI app to make a donation.
+                </p>
+                <div className="mx-auto mt-4 w-full max-w-[240px] rounded-xl border border-slate-200 bg-white p-3">
+                  <Image
+                    src="/images/donation-qr.png"
+                    alt="Izra Smile Foundation donation QR code"
+                    width={400}
+                    height={400}
+                    className="h-auto w-full object-contain"
+                    priority
+                  />
+                </div>
+                <p className="mt-3 text-xs leading-5 text-slate-500">
+                  Please verify the recipient name in your payment app before paying.
+                </p>
+              </div>
+
               <div className="mb-5 flex items-center gap-3">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sky-500/20 text-sky-200">
                   {step === 4 ? <Check className="h-5 w-5" aria-hidden="true" /> : <HandHeart className="h-5 w-5" aria-hidden="true" />}
