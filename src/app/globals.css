@@ -40,6 +40,10 @@ body {
   line-height: 1.6;
 }
 
+.font-display {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
 * {
   box-sizing: border-box;
 }

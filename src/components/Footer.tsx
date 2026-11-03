@@ -9,6 +9,7 @@ const quickLinks = [
   { label: "Our Work", href: "#support" },
   { label: "Impact", href: "#impact" },
   { label: "Gallery", href: "#gallery" },
+  { label: "Transparency", href: "/transparency" },
   { label: "Get Involved", href: "#involved" },
   { label: "Donate", href: "#donate" },
   { label: "Contact", href: "#contact" },

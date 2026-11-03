@@ -52,11 +52,11 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <nav aria-label="Main navigation" className="flex h-20 items-center justify-between gap-5">
           <Link
-            href="#home"
+            href="/"
             className="flex items-center gap-3"
             aria-label="Izra Smile Foundation home"
-            aria-current={activeHref === "#home" ? "location" : undefined}
-            onClick={() => setActiveHref("#home")}
+            aria-current={activeHref === "/" ? "location" : undefined}
+            onClick={() => setActiveHref("/")}
           >
             <div className="relative h-14 w-14 shrink-0">
               <Image
